@@ -7,14 +7,14 @@ import ai.liquid.leap.ModelRunner
 import ai.liquid.leap.message.ChatMessage
 import ai.liquid.leap.downloader.LeapModelDownloader
 import ai.liquid.leap.downloader.LeapModelDownloaderNotificationConfig
-import ai.liquid.leap.function.LeapFunction
 import ai.liquid.leap.function.LeapFunctionCall
-import ai.liquid.leap.function.LeapFunctionParameter
-import ai.liquid.leap.function.LeapFunctionParameterType
 import ai.liquid.leap.message.ChatMessageContent
 import ai.liquid.leap.message.MessageResponse
 import ai.liquid.leapchat.models.ChatMessageDisplayItem
+import ai.liquid.leapchat.tools.ToolRegistry
+import ai.liquid.leapchat.tools.ToolStore
 import ai.liquid.leapchat.views.ChatHistory
+import ai.liquid.leapchat.views.ConnectPanel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -102,6 +102,15 @@ class MainActivity : ComponentActivity() {
         MutableLiveData<Boolean>(false)
     }
 
+    // Tool registry (built-in + HTTP tools) and store
+    private val toolStore: ToolStore by lazy { ToolStore(this) }
+    private val toolRegistry: ToolRegistry by lazy { ToolRegistry(toolStore) }
+
+    // Whether the connect panel is shown
+    private val showConnectPanel: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>(false)
+    }
+
     private val json = Json { ignoreUnknownKeys = true }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,6 +146,7 @@ class MainActivity : ComponentActivity() {
         var userInputFieldText by remember { mutableStateOf("") }
         val chatHistoryFocusRequester = remember { FocusRequester() }
         val isInGeneration = this.isInGeneration.observeAsState(false)
+        val showConnect by showConnectPanel.observeAsState(false)
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -184,6 +194,12 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxWidth(1.0f)
                             ) {
                                 val isToolEnabledState by isToolEnabled.observeAsState(false)
+                                val showConnect by showConnectPanel.observeAsState(false)
+                                Button(onClick = {
+                                    showConnectPanel.value = true
+                                }) {
+                                    Text(getString(R.string.connect_button_label))
+                                }
                                 Button(onClick = {
                                     isToolEnabled.value = !isToolEnabledState
                                 }) {
@@ -235,6 +251,13 @@ class MainActivity : ComponentActivity() {
             ) {
                 ChatHistory(chatMessageHistory)
             }
+        }
+
+        if (showConnect) {
+            ConnectPanel(
+                store = toolStore,
+                onDismiss = { showConnectPanel.value = false }
+            )
         }
     }
 
@@ -371,19 +394,9 @@ class MainActivity : ComponentActivity() {
 
     private fun processFunctionCalls(functionCalls: List<LeapFunctionCall>) {
         for (call in functionCalls) {
-            when (call.name) {
-                "compute_sum" -> {
-                    val numbers = call.arguments["values"] as? List<String> ?: listOf()
-                    var sum = 0.0
-                    for (v in numbers) {
-                        sum += v.toDoubleOrNull() ?: 0.0
-                    }
-                    sendToolText("Sum = $sum")
-                }
-
-                else -> {
-                    sendToolText("Tool: ${call.name} is not available")
-                }
+            lifecycleScope.launch {
+                val result = toolRegistry.execute(call.name, call.arguments ?: emptyMap())
+                sendToolText(result)
             }
         }
     }
@@ -406,19 +419,7 @@ class MainActivity : ComponentActivity() {
         }
 
         if (isToolEnabled.value == true) {
-            conversation.registerFunction(
-                LeapFunction(
-                    "compute_sum", "Compute sum of a series of numbers", listOf(
-                        LeapFunctionParameter(
-                            name = "values",
-                            type = LeapFunctionParameterType.LeapArr(
-                                itemType = LeapFunctionParameterType.LeapStr()
-                            ),
-                            description = "Numbers to compute sum. Values should be represented in string."
-                        )
-                    )
-                )
-            )
+            toolRegistry.registerAll(conversation)
         }
 
         return conversation

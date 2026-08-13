@@ -11,3 +11,4 @@ libs/
 local.properties
 /.kotlin/
 artifacts/
+release-signed/
