@@ -10,3 +10,4 @@ libs/
 .cxx
 local.properties
 /.kotlin/
+artifacts/
