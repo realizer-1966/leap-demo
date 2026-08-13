@@ -145,6 +145,24 @@ class MainActivity : ComponentActivity() {
                         WindowInsets.ime
                     )
                 ),
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = getString(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = getString(R.string.app_branding),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            },
             bottomBar = {
                 Box {
                     if (modelRunnerInstance == null) {
