@@ -56,7 +56,7 @@ class ToolRegistry(private val store: ToolStore) {
         return when (type) {
             ToolParamType.STRING -> LeapFunctionParameterType.LeapStr()
             ToolParamType.INT -> LeapFunctionParameterType.LeapInt()
-            ToolParamType.NUM -> LeapFunctionParameterType.LeapNum.DoubleNum()
+            ToolParamType.NUM -> LeapFunctionParameterType.LeapStr()
             ToolParamType.BOOL -> LeapFunctionParameterType.LeapBool()
             ToolParamType.ARR_STRING -> LeapFunctionParameterType.LeapArr(
                 itemType = LeapFunctionParameterType.LeapStr()

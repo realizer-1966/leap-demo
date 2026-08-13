@@ -164,6 +164,7 @@ fun ConnectPanel(
 }
 
 /** HTTP 도구 추가 폼 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddHttpToolSheet(
     onDismiss: () -> Unit,
