@@ -1,0 +1,16 @@
+Example Chat App for LeapSDK
+===
+This is a simple chat app for LeapSDK in Android to illustrate how to use LeapSDK. The UI is implemented with [Jetpack Compose](https://developer.android.com/develop/ui/compose/documentation).
+
+Almost all logic interacting with LeapSDK is in [MainActivity.kt](app/src/main/java/ai/liquid/leapchat/MainActivity.kt). Following features are touched:
+* Downloading a model from Leap Model Library.
+* Loading a model.
+* Generating responses from a conversation.
+* Continue generation from the chat history.
+* Serialize/deserialize the chat history with Kotlin Serialization.
+* Function calling to get accurate answers for math compuation.
+
+## Screenshot
+This is a screenshot of the app running a Qwen3 reasoning model.
+
+<img src="docs/screenshot.png" width="200">
