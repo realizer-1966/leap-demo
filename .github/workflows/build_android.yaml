@@ -34,31 +34,20 @@ jobs:
           name: leap-demo-debug
           path: app/build/outputs/apk/debug/*.apk
 
-      # --- Release signed APK ---
+      # --- Release signed APK (Gradle handles signing via signingConfigs) ---
       - name: Decode keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > /tmp/leap-keystore.p12
+          echo "KEYSTORE_FILE=/tmp/leap-keystore.p12" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
 
-      - name: Build release APK (unsigned)
+      - name: Build signed release APK
         run: ./gradlew assembleRelease --no-daemon
-
-      - name: Sign release APK with apksigner
-        run: |
-          cp app/build/outputs/apk/release/app-release-unsigned.apk /tmp/app-release-signed.apk
-          $ANDROID_HOME/build-tools/*/apksigner sign \
-            --ks /tmp/leap-keystore.p12 \
-            --ks-type PKCS12 \
-            --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
-            --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --out /tmp/leap-demo-release-signed.apk \
-            app/build/outputs/apk/release/app-release-unsigned.apk
-
-      - name: Verify signature
-        run: $ANDROID_HOME/build-tools/*/apksigner verify --verbose /tmp/leap-demo-release-signed.apk
 
       - name: Upload signed release APK
         uses: actions/upload-artifact@v4
         with:
           name: leap-demo-release-signed
-          path: /tmp/leap-demo-release-signed.apk
+          path: app/build/outputs/apk/release/*.apk
