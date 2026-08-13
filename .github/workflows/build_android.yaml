@@ -25,11 +25,11 @@ jobs:
       - name: Install Android SDK Platform 36
         run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36"
 
-      - name: Build release APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Build debug APK (debug-signed, installable)
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: leap-demo-release
-          path: app/build/outputs/apk/release/*.apk
+          name: leap-demo-debug
+          path: app/build/outputs/apk/debug/*.apk
