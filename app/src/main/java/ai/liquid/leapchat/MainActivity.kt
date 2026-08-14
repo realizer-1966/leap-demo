@@ -186,20 +186,22 @@ class MainActivity : ComponentActivity() {
                                 enabled = !isInGeneration.value
                             )
                             Row(
-                                horizontalArrangement = Arrangement.End,
-                                modifier = Modifier.fillMaxWidth(1.0f)
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxWidth(1.0f)
+                                    .padding(horizontal = 4.dp)
                             ) {
                                 val showConnect by showConnectPanel.observeAsState(false)
-                                Button(onClick = {
-                                    showConnectPanel.value = true
-                                }) {
+                                Button(
+                                    onClick = { showConnectPanel.value = true },
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     Text(getString(R.string.connect_button_label))
                                 }
                                 Button(
-                                    onClick = {
-                                        job?.cancel()
-                                    },
-                                    enabled = isInGeneration.value
+                                    onClick = { job?.cancel() },
+                                    enabled = isInGeneration.value,
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Text(getString(R.string.stop_generation_button_label))
                                 }
@@ -208,7 +210,8 @@ class MainActivity : ComponentActivity() {
                                         conversationHistoryJSONString = null
                                         this@MainActivity.chatMessageHistory.value = listOf()
                                     },
-                                    enabled = !isInGeneration.value && (conversationHistoryJSONString != null)
+                                    enabled = !isInGeneration.value && (conversationHistoryJSONString != null),
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Text(getString(R.string.clean_history_button_label))
                                 }
@@ -219,7 +222,8 @@ class MainActivity : ComponentActivity() {
                                         userInputFieldText = ""
                                         chatHistoryFocusRequester.requestFocus()
                                     },
-                                    enabled = !isInGeneration.value
+                                    enabled = !isInGeneration.value,
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     Text(getString(R.string.send_message_button_label))
                                 }
@@ -378,12 +382,10 @@ class MainActivity : ComponentActivity() {
             }
     }
 
-    private fun processFunctionCalls(functionCalls: List<LeapFunctionCall>) {
+    private suspend fun processFunctionCalls(functionCalls: List<LeapFunctionCall>) {
         for (call in functionCalls) {
-            lifecycleScope.launch {
-                val result = toolRegistry.execute(call.name, call.arguments ?: emptyMap())
-                sendToolText(result)
-            }
+            val result = toolRegistry.execute(call.name, call.arguments ?: emptyMap())
+            sendToolText(result)
         }
     }
 
