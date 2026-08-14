@@ -1,10 +1,12 @@
 package ai.liquid.leapchat.views
 
+import ai.liquid.leapchat.models.LeapModels
 import ai.liquid.leapchat.tools.BuiltinTools
 import ai.liquid.leapchat.tools.HttpTool
 import ai.liquid.leapchat.tools.ToolParameter
 import ai.liquid.leapchat.tools.ToolParamType
 import ai.liquid.leapchat.tools.ToolStore
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,12 +18,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -68,6 +73,14 @@ fun ConnectPanel(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(16.dp))
+
+            // --- 모델 선택 섹션 ---
+            Text("모델 선택", style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(4.dp))
+            ModelSelector(store = store, refreshKey = refreshKey)
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(12.dp))
 
             // --- 내장 도구 섹션 ---
             Text("내장 도구 (오프라인)", style = MaterialTheme.typography.titleSmall)
@@ -267,5 +280,71 @@ private fun parseHttpParams(encoded: String): List<ToolParameter> {
             else -> ToolParamType.STRING
         }
         ToolParameter(parts[0].trim(), type, parts.getOrNull(2)?.trim() ?: "", true)
+    }
+}
+
+/**
+ * 모델 선택 드롭다운.
+ * 선택한 모델을 ToolStore에 저장. (재시작 시 적용)
+ */
+@Composable
+private fun ModelSelector(store: ToolStore, refreshKey: Int) {
+    var expanded by remember { mutableStateOf(false) }
+    val currentName = remember(store, refreshKey) { store.getModelName() }
+    val currentModel = LeapModels.byName(currentName) ?: LeapModels.default
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // 현재 선택된 모델 표시 + 드롭다운 트리거
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    currentModel.displayName,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    currentModel.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text("▾", style = MaterialTheme.typography.titleMedium)
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            LeapModels.options.forEach { model ->
+                DropdownMenuItem(
+                    text = {
+                        Column {
+                            Text(model.displayName, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                model.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    onClick = {
+                        store.setModel(model.name, model.quantization)
+                        expanded = false
+                    }
+                )
+            }
+        }
+
+        Text(
+            "모델 변경은 앱 재시작 후 적용됩니다.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

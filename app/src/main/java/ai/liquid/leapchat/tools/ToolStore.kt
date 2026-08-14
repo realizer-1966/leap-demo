@@ -63,6 +63,18 @@ class ToolStore(context: Context) {
         prefs.edit().putString("http_tools_json", obj.toString()).apply()
     }
 
+    // --- 모델 설정 ---
+    fun getModelName(): String = prefs.getString("model_name", "LFM2-350M") ?: "LFM2-350M"
+
+    fun getQuantization(): String = prefs.getString("model_quantization", "Q8_0") ?: "Q8_0"
+
+    fun setModel(name: String, quantization: String) {
+        prefs.edit()
+            .putString("model_name", name)
+            .putString("model_quantization", quantization)
+            .apply()
+    }
+
     private fun parseParams(encoded: String): List<ToolParameter> {
         if (encoded.isBlank()) return emptyList()
         return encoded.split(";").mapNotNull { seg ->

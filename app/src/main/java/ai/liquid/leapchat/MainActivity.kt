@@ -257,6 +257,10 @@ class MainActivity : ComponentActivity() {
     private fun loadModel(onError: (Throwable) -> Unit, onStatusChange: (String) -> Unit) {
         lifecycleScope.launch {
             try {
+                // 선택된 모델 (연결 패널에서 설정)
+                val modelName = toolStore.getModelName()
+                val quantization = toolStore.getQuantization()
+
                 // Reuse downloader instance to avoid concurrent download issues
                 if (downloader == null) {
                     downloader = LeapModelDownloader(
@@ -270,17 +274,17 @@ class MainActivity : ComponentActivity() {
                 val downloaderInstance = downloader!!
 
                 // Check if model needs to be downloaded
-                val currentStatus = downloaderInstance.queryStatus(MODEL_NAME, QUANTIZATION_SLUG)
+                val currentStatus = downloaderInstance.queryStatus(modelName, quantization)
 
                 if (currentStatus is LeapModelDownloader.ModelDownloadStatus.NotOnLocal) {
                     // Model needs to be downloaded
                     onStatusChange("Starting download...")
 
                     // Observe download progress
-                    val progressFlow = downloaderInstance.observeDownloadProgress(MODEL_NAME, QUANTIZATION_SLUG)
+                    val progressFlow = downloaderInstance.observeDownloadProgress(modelName, quantization)
 
                     // Start the download
-                    downloaderInstance.requestDownloadModel(MODEL_NAME, QUANTIZATION_SLUG)
+                    downloaderInstance.requestDownloadModel(modelName, quantization)
 
                     // Collect progress updates until download completes
                     progressFlow
@@ -295,21 +299,21 @@ class MainActivity : ComponentActivity() {
                                 }
                                 onStatusChange("Downloading model: $percentage% ($downloadedMB MB / $totalMB MB)")
                             } else {
-                                val downloadStatus = downloaderInstance.queryStatus(MODEL_NAME, QUANTIZATION_SLUG)
+                                val downloadStatus = downloaderInstance.queryStatus(modelName, quantization)
                                 if (downloadStatus is LeapModelDownloader.ModelDownloadStatus.Downloaded) {
                                     onStatusChange("Download complete!")
                                 }
                             }
                         }
                         .takeWhile { progress ->
-                            progress != null || downloaderInstance.queryStatus(MODEL_NAME, QUANTIZATION_SLUG) is LeapModelDownloader.ModelDownloadStatus.DownloadInProgress
+                            progress != null || downloaderInstance.queryStatus(modelName, quantization) is LeapModelDownloader.ModelDownloadStatus.DownloadInProgress
                         }
                         .collect()
                 }
 
                 modelRunner.value = downloaderInstance.loadModel(
-                    modelName = MODEL_NAME,
-                    quantizationType = QUANTIZATION_SLUG,
+                    modelName = modelName,
+                    quantizationType = quantization,
                 )
             } catch (e: LeapModelLoadingException) {
                 onError(e)
@@ -490,8 +494,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        const val MODEL_NAME = "LFM2-350M"
-        const val QUANTIZATION_SLUG = "Q8_0"
+        // 모델은 ToolStore에서 동적으로 읽음 (연결 패널에서 선택)
     }
 }
 
