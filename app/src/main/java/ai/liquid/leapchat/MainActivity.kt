@@ -98,10 +98,6 @@ class MainActivity : ComponentActivity() {
         MutableLiveData<Boolean>(false)
     }
 
-    private val isToolEnabled: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>(false)
-    }
-
     // Tool registry (built-in + HTTP tools) and store
     private val toolStore: ToolStore by lazy { ToolStore(this) }
     private val toolRegistry: ToolRegistry by lazy { ToolRegistry(toolStore) }
@@ -193,21 +189,11 @@ class MainActivity : ComponentActivity() {
                                 horizontalArrangement = Arrangement.End,
                                 modifier = Modifier.fillMaxWidth(1.0f)
                             ) {
-                                val isToolEnabledState by isToolEnabled.observeAsState(false)
                                 val showConnect by showConnectPanel.observeAsState(false)
                                 Button(onClick = {
                                     showConnectPanel.value = true
                                 }) {
                                     Text(getString(R.string.connect_button_label))
-                                }
-                                Button(onClick = {
-                                    isToolEnabled.value = !isToolEnabledState
-                                }) {
-                                    if (isToolEnabledState) {
-                                        Text(getString(R.string.tool_on_button_label))
-                                    } else {
-                                        Text(getString(R.string.tool_off_button_label))
-                                    }
                                 }
                                 Button(
                                     onClick = {
@@ -418,9 +404,8 @@ class MainActivity : ComponentActivity() {
             conversationInstance
         }
 
-        if (isToolEnabled.value == true) {
-            toolRegistry.registerAll(conversation)
-        }
+        // 활성화된 도구(연결 패널 체크박스 기준)를 Conversation에 등록
+        toolRegistry.registerAll(conversation)
 
         return conversation
     }
