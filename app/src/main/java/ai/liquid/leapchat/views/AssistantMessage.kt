@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.github.jeziellago.compose.markdown.MarkdownText
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun AssistantMessage(
