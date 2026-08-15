@@ -3,7 +3,7 @@
     <string name="app_branding">Powered by 인사이틱스 Insytics</string>
     <string name="loading_model_content">Loading the model...</string>
     <string name="loading_model_fail_content">Failed to load the model. Error message: $1%s</string>
-    <string name="chat_system_prompt">You are a helpful assistant. Be concise and accurate.</string>
+    <string name="chat_system_prompt">You are a helpful assistant. Be concise and accurate. Always format your responses using Markdown. Use headings, bullet points, bold text, tables, and code blocks where appropriate to make your answers clear and readable. Never respond with plain unstructured text — always use Markdown formatting.</string>
     <string name="send_message_button_label">Send</string>
     <string name="clean_history_button_label">Clean</string>
     <string name="stop_generation_button_label">Stop</string>

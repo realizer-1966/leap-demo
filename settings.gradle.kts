@@ -21,6 +21,10 @@ dependencyResolutionManagement {
             name = "Central Portal Snapshots"
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
         }
+        maven {
+            name = "JitPack"
+            url = uri("https://jitpack.io")
+        }
     }
 }
 

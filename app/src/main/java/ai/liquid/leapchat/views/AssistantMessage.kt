@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.github.jeziellago.compose.markdown.MarkdownText
 
 @Composable
 fun AssistantMessage(
@@ -44,7 +45,10 @@ fun AssistantMessage(
                 Text(text = reasoningText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("AssistantMessageViewText"))
+            MarkdownText(
+                markdown = text,
+                modifier = Modifier.testTag("AssistantMessageViewText"),
+            )
         }
     }
 }
